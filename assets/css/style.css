@@ -198,6 +198,20 @@ p { text-wrap: pretty; }
   margin-top: 14px; font-size: clamp(.82rem, 2.3vw, .9rem); color: var(--muted);
 }
 
+/* ---- Prueba social bajo el CTA del hero ---- */
+.social-proof {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 18px; font-size: .88rem; font-weight: 600; color: var(--ink);
+}
+.social-proof__avatars { display: flex; flex-shrink: 0; }
+.social-proof__avatars img {
+  width: 30px; height: 30px; border-radius: 50%; object-fit: cover;
+  border: 2px solid var(--paper); background: var(--paper-2);
+  margin-left: -10px;
+}
+.social-proof__avatars img:first-child { margin-left: 0; }
+.social-proof .js-count { color: var(--accent-dark); font-weight: 800; }
+
 .hero__media { position: relative; }
 .hero__img {
   width: 100%; max-width: 440px; margin-inline: auto;
@@ -323,6 +337,24 @@ p { text-wrap: pretty; }
 .testi--highlight .testi__quote { color: rgba(255,255,255,.92); }
 .testi--highlight .testi__quote strong { color: var(--accent-2); }
 .testi--highlight .testi__avatar { border-color: rgba(255,255,255,.2); box-shadow: none; }
+
+/* ================================================================
+   DOLORES — agitación del problema antes de la solución
+   ================================================================ */
+.pains-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 18px; margin-top: 40px;
+}
+.pain {
+  background: var(--paper); border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--r); padding: 24px 20px;
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+}
+.pain:hover { transform: translateY(-4px); box-shadow: var(--shadow-m); }
+.pain__icon { font-size: 1.8rem; display: block; margin-bottom: 12px; }
+.pain h3 { font-size: 1rem; margin-bottom: 6px; }
+.pain p { font-size: .88rem; color: var(--muted); line-height: 1.45; }
 
 /* ================================================================
    REGALOS — grid con brillo secuencial + regalo sorpresa
@@ -650,11 +682,13 @@ p { text-wrap: pretty; }
   .grid--3 { grid-template-columns: 1fr 1fr; }
   .testi--highlight { grid-column: 1 / -1; }
   .gifts-grid { grid-template-columns: repeat(3, 1fr); }
+  .pains-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 640px) {
   .grid--3, .grid--2 { grid-template-columns: 1fr; }
   .stats-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .pains-grid { grid-template-columns: 1fr; gap: 12px; }
   .stat { padding: 14px 6px; }
   .stat__label { font-size: .68rem; }
   .gifts-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
