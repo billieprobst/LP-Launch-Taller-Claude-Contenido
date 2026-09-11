@@ -17,6 +17,9 @@ const CONFIG = {
 
   // Espera antes de redirigir (ms) para que se vea el mensaje de éxito
   REDIRECT_DELAY_MS: 1200,
+
+  // Pop-up de conversión: aparece a los X segundos si no se ha registrado ni cerrado antes
+  POPUP_DELAY_MS: 60000,
 };
 
 /* ================================================================
@@ -293,5 +296,65 @@ function normalizeInstagram(value) {
     setTimeout(() => {
       window.location.href = CONFIG.WHATSAPP_GROUP;
     }, CONFIG.REDIRECT_DELAY_MS);
+  });
+})();
+
+/* ================================================================
+   7. POP-UP DE CONVERSIÓN — aparece a los 60s
+   No se muestra si: ya se cerró antes en esta sesión, ya se registró,
+   o el usuario ya está viendo el formulario (#registro visible).
+   ================================================================ */
+(function conversionPopup() {
+  const overlay = document.getElementById("popup-overlay");
+  if (!overlay) return;
+
+  function alreadyHandled() {
+    try {
+      return (
+        sessionStorage.getItem("inmoescala_popup_visto") === "1" ||
+        sessionStorage.getItem("inmoescala_registrado") === "1"
+      );
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function markHandled() {
+    try { sessionStorage.setItem("inmoescala_popup_visto", "1"); } catch (_) {}
+  }
+
+  function openPopup() {
+    if (alreadyHandled()) return;
+    // No interrumpir si el formulario ya está a la vista
+    const form = document.getElementById("registro");
+    if (form) {
+      const rect = form.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      if (isVisible) return;
+    }
+    overlay.hidden = false;
+    document.body.style.overflow = "hidden";
+    markHandled();
+  }
+
+  function closePopup() {
+    overlay.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  const timer = setTimeout(openPopup, CONFIG.POPUP_DELAY_MS);
+
+  document.getElementById("popup-close")?.addEventListener("click", closePopup);
+  document.getElementById("popup-cta")?.addEventListener("click", closePopup);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closePopup();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !overlay.hidden) closePopup();
+  });
+
+  // Si el usuario envía el formulario antes de que salga el pop-up, cancelarlo
+  document.getElementById("lead-form")?.addEventListener("submit", () => {
+    clearTimeout(timer);
   });
 })();

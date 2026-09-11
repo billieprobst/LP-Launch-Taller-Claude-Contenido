@@ -626,3 +626,65 @@ h3 { font-size: 1.1rem; font-weight: 600; letter-spacing: 0; }
   .countdown__unit small { font-size: .52rem; }
   .countdown__timer { gap: 6px; }
 }
+
+/* ================================================================
+   POP-UP (aparece a los 60s)
+   ================================================================ */
+.popup-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(14, 26, 68, .6);
+  backdrop-filter: blur(3px);
+  display: grid; place-items: center;
+  padding: 20px;
+  animation: popup-fade .3s var(--ease);
+}
+.popup-overlay[hidden] { display: none; }
+@keyframes popup-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.popup {
+  position: relative;
+  background: var(--paper);
+  border-radius: var(--r-lg);
+  padding: clamp(28px, 6vw, 40px);
+  max-width: 420px; width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-l);
+  animation: popup-pop .35s var(--ease);
+}
+@keyframes popup-pop {
+  from { opacity: 0; transform: scale(.92) translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .popup-overlay, .popup { animation: none; }
+}
+
+.popup__close {
+  position: absolute; top: 14px; right: 14px;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1.5px solid var(--line); background: var(--paper);
+  color: var(--muted); font-size: .9rem; cursor: pointer;
+  display: grid; place-items: center;
+  transition: background .15s var(--ease), color .15s var(--ease);
+}
+.popup__close:hover { background: var(--paper-2); color: var(--ink); }
+
+.popup__badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(242, 101, 34, .1); color: var(--accent-dark);
+  font-weight: 700; font-size: .72rem; letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 7px 14px; border-radius: 999px; margin-bottom: 16px;
+}
+
+.popup h3 {
+  font-size: clamp(1.15rem, 4vw, 1.4rem);
+  margin-bottom: 14px;
+}
+
+.popup__social {
+  font-size: .96rem; color: var(--body);
+  background: var(--paper-2); border-radius: var(--r-sm);
+  padding: 10px 14px; margin-bottom: 22px;
+}
+.popup__social strong { color: var(--navy); }
