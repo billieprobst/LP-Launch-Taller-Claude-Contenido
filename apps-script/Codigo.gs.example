@@ -1,0 +1,162 @@
+/* ================================================================
+   INMOESCALA CLUB — Backend (Google Apps Script)
+   - Guarda cada registro en el Google Sheet
+   - Envía email de bienvenida con el enlace del grupo (vía Resend)
+
+   NOTA sobre Pancake CRM: soporte de Pancake confirmó que su API solo
+   se conecta con el ecosistema propio (Google Sheets, Wercake, etc.),
+   no con plataformas externas. Por eso este Sheet ES el punto de
+   conexión: se configura la importación desde Google Sheets dentro
+   de Pancake (Configuración → Conectar), sin necesitar código extra.
+   ================================================================
+
+   CÓMO INSTALAR (ver README.md para el detalle):
+   1. Crea un Google Sheet nuevo. Copia su ID de la URL:
+      https://docs.google.com/spreadsheets/d/ESTO_ES_EL_ID/edit
+   2. Extensiones → Apps Script. Pega este archivo completo.
+   3. Rellena las constantes de CONFIG de abajo.
+   4. Implementar → Nueva implementación → Aplicación web:
+        - Ejecutar como: Yo
+        - Quién tiene acceso: Cualquier usuario
+      Copia la URL /exec y pégala en assets/js/main.js (APPS_SCRIPT_URL).
+   5. Ejecuta una vez la función "setup" para crear los encabezados.
+   ================================================================ */
+
+const CONFIG = {
+  SHEET_ID: "1kOmvlU3JFswr07vRd4_3wTMEx6tbncGcepUlR_jCbwc",
+  SHEET_NAME: "Registros",
+
+  RESEND_API_KEY: "PEGAR_API_KEY_DE_RESEND",
+  FROM_EMAIL: "Inmoescala <soporte@inmoescala.com>",
+  REPLY_TO: "soporte@inmoescala.com",
+
+  WHATSAPP_GROUP: "https://chat.whatsapp.com/ITDVWsMDcHaIc5t96VjvVS",
+  LAUNCH_TEXT: "8 de octubre, 6:00 pm (Ecuador · Colombia · Perú)",
+};
+
+const HEADERS = [
+  "Fecha", "Nombre", "WhatsApp", "Email", "Instagram",
+  "Rol", "Rol_otro", "Antiguedad", "Reto_contenido", "Interes",
+  "UTM_source", "UTM_medium", "UTM_campaign", "UTM_content", "UTM_term",
+  "User_agent", "Pagina", "Email_enviado",
+];
+
+/* ---------- Ejecutar una vez a mano para preparar la hoja ---------- */
+function setup() {
+  const sh = getSheet_();
+  if (sh.getLastRow() === 0) {
+    sh.appendRow(HEADERS);
+    sh.setFrozenRows(1);
+  }
+  Logger.log("Hoja lista: " + sh.getName());
+}
+
+/* ---------- Endpoint POST ---------- */
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const sh = getSheet_();
+    if (sh.getLastRow() === 0) { sh.appendRow(HEADERS); sh.setFrozenRows(1); }
+
+    let emailStatus = "no";
+    try {
+      if (data.email) { sendWelcomeEmail_(data); emailStatus = "si"; }
+    } catch (mailErr) {
+      emailStatus = "error: " + mailErr;
+    }
+
+    sh.appendRow([
+      data.fecha || new Date().toISOString(),
+      data.nombre || "",
+      data.whatsapp || "",
+      data.email || "",
+      data.instagram || "",
+      data.rol || "",
+      data.rol_otro || "",
+      data.antiguedad || "",
+      data.reto_contenido || "",
+      data.interes || "",
+      data.utm_source || "",
+      data.utm_medium || "",
+      data.utm_campaign || "",
+      data.utm_content || "",
+      data.utm_term || "",
+      data.user_agent || "",
+      data.pagina || "",
+      emailStatus,
+    ]);
+
+    return json_({ ok: true });
+  } catch (err) {
+    return json_({ ok: false, error: String(err) });
+  }
+}
+
+function doGet() {
+  return json_({ ok: true, msg: "Inmoescala Club endpoint activo" });
+}
+
+/* ---------- Helpers ---------- */
+function getSheet_() {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  return ss.getSheetByName(CONFIG.SHEET_NAME) || ss.insertSheet(CONFIG.SHEET_NAME);
+}
+
+function json_(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/* ---------- Email de bienvenida vía Resend ---------- */
+function sendWelcomeEmail_(data) {
+  const nombre = (data.nombre || "").split(" ")[0] || "";
+  const html = welcomeHtml_(nombre);
+
+  const res = UrlFetchApp.fetch("https://api.resend.com/emails", {
+    method: "post",
+    contentType: "application/json",
+    headers: { Authorization: "Bearer " + CONFIG.RESEND_API_KEY },
+    muteHttpExceptions: true,
+    payload: JSON.stringify({
+      from: CONFIG.FROM_EMAIL,
+      to: [data.email],
+      reply_to: CONFIG.REPLY_TO,
+      subject: "✅ Estás dentro — tu acceso al grupo de Inmoescala Club",
+      html: html,
+    }),
+  });
+
+  const code = res.getResponseCode();
+  if (code >= 300) {
+    throw new Error("Resend " + code + ": " + res.getContentText());
+  }
+}
+
+function welcomeHtml_(nombre) {
+  const saludo = nombre ? ("Hola " + nombre + ",") : "Hola,";
+  return `
+  <div style="font-family:Arial,Helvetica,sans-serif;max-width:520px;margin:0 auto;color:#1f2430;">
+    <h2 style="color:#1b2a5b;">${saludo}</h2>
+    <p>Tu registro está confirmado. Aquí tienes tu acceso al grupo privado donde daremos
+       toda la información del lanzamiento en vivo:</p>
+    <p style="text-align:center;margin:28px 0;">
+      <a href="${CONFIG.WHATSAPP_GROUP}"
+         style="background:#f26522;color:#fff;text-decoration:none;font-weight:bold;
+                padding:14px 28px;border-radius:999px;display:inline-block;">
+        👉 Entrar al grupo de WhatsApp
+      </a>
+    </p>
+    <p>📅 <strong>Lanzamiento en vivo:</strong> ${CONFIG.LAUNCH_TEXT}</p>
+    <p>🎁 <strong>Sorteo:</strong> estás participando por una auditoría de tu perfil y
+       contenido de Instagram. El ganador se anuncia en vivo — tienes que estar presente.</p>
+    <p>Dentro del grupo compartiremos recursos y el enlace de acceso el día del evento.
+       Cualquier duda, escríbenos por Instagram:
+       <a href="https://instagram.com/billieprobst">@billieprobst</a>.</p>
+    <p>Nos vemos dentro,<br><strong>Equipo Inmoescala</strong></p>
+    <hr style="border:none;border-top:1px solid #e2e8f2;margin:24px 0;">
+    <p style="font-size:12px;color:#5b6472;">
+      Recibes este correo porque te registraste en la landing de Inmoescala Club.
+    </p>
+  </div>`;
+}
