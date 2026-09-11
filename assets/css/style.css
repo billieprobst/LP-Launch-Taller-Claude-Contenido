@@ -280,23 +280,6 @@ p { text-wrap: pretty; }
 .grid--3 { grid-template-columns: repeat(3, 1fr); }
 .grid--2 { grid-template-columns: repeat(2, 1fr); }
 
-/* ---- Fila de cifras con conteo animado ---- */
-.stats-row {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 18px; margin: 36px 0 8px;
-}
-.stat {
-  text-align: center; padding: 22px 14px;
-  background: var(--paper-2); border-radius: var(--r);
-}
-.stat__num {
-  font-weight: 800; line-height: 1;
-  font-size: clamp(1.5rem, 5vw, 2.1rem);
-  color: var(--navy); font-variant-numeric: tabular-nums;
-}
-.stat__suffix { font-size: .55em; font-weight: 700; color: var(--cyan-deep); margin-left: 3px; }
-.stat__label { margin-top: 8px; font-size: .8rem; color: var(--muted); line-height: 1.35; }
-
 .testi-wrap { margin-top: 44px; }
 
 .testi {
@@ -688,10 +671,7 @@ p { text-wrap: pretty; }
 
 @media (max-width: 640px) {
   .grid--3, .grid--2 { grid-template-columns: 1fr; }
-  .stats-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .pains-grid { grid-template-columns: 1fr; gap: 12px; }
-  .stat { padding: 14px 6px; }
-  .stat__label { font-size: .68rem; }
   .gifts-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .gift__media { height: 100px; }
   .gift__media img { max-width: 100px; max-height: 100px; }
