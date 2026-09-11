@@ -247,6 +247,7 @@ function normalizeInstagram(value) {
       antiguedad: fd.get("antiguedad") || "",
       reto_contenido: fd.get("reto_contenido") || "",
       interes: fd.get("interes") || "",
+      inversion: fd.get("inversion") || "",
       ...utms,
       user_agent: navigator.userAgent,
       pagina: location.href,

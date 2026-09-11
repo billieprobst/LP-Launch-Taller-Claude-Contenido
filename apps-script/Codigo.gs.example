@@ -36,7 +36,7 @@ const CONFIG = {
 
 const HEADERS = [
   "Fecha", "Nombre", "WhatsApp", "Email", "Instagram",
-  "Rol", "Rol_otro", "Antiguedad", "Reto_contenido", "Interes",
+  "Rol", "Rol_otro", "Antiguedad", "Reto_contenido", "Interes", "Inversion",
   "UTM_source", "UTM_medium", "UTM_campaign", "UTM_content", "UTM_term",
   "User_agent", "Pagina", "Email_enviado",
 ];
@@ -76,6 +76,7 @@ function doPost(e) {
       data.antiguedad || "",
       data.reto_contenido || "",
       data.interes || "",
+      data.inversion || "",
       data.utm_source || "",
       data.utm_medium || "",
       data.utm_campaign || "",
