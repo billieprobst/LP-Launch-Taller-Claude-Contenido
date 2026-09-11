@@ -51,6 +51,47 @@ document.getElementById("year").textContent = new Date().getFullYear();
 })();
 
 /* ================================================================
+   1c. CONTADORES ANIMADOS (.js-count) — suben desde 0 al entrar en vista
+   ================================================================ */
+const runCounter = (function counterSetup() {
+  function animate(el) {
+    if (el.dataset.counted) return;
+    el.dataset.counted = "1";
+    const target = parseInt(el.dataset.count, 10) || 0;
+    const prefix = el.dataset.prefix || "";
+    const duration = 1100;
+    let start = null;
+
+    function frame(ts) {
+      if (start === null) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
+      const value = Math.round(target * eased);
+      el.textContent = prefix + value.toLocaleString("en-US");
+      if (p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  const counters = document.querySelectorAll(".js-count");
+  if (counters.length && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) { animate(e.target); io.unobserve(e.target); }
+        });
+      },
+      { threshold: 0.4 }
+    );
+    counters.forEach((el) => io.observe(el));
+  } else {
+    counters.forEach(animate);
+  }
+
+  return animate; // se reutiliza para contadores dentro del pop-up (oculto al cargar)
+})();
+
+/* ================================================================
    2. CONTADOR REGRESIVO
    ================================================================ */
 (function countdown() {
@@ -335,6 +376,8 @@ function normalizeInstagram(value) {
     overlay.hidden = false;
     document.body.style.overflow = "hidden";
     markHandled();
+    // el contador del pop-up estaba oculto al cargar la página; se dispara ahora
+    overlay.querySelectorAll(".js-count").forEach((el) => runCounter(el));
   }
 
   function closePopup() {

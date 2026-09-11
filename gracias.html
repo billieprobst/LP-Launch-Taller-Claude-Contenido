@@ -10,16 +10,45 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    .gracias-wrap {
+      min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden;
+    }
+    .gracias-check {
+      width: 68px; height: 68px; margin: 0 auto 18px;
+      border-radius: 50%; background: rgba(34, 166, 232, .16);
+      display: grid; place-items: center;
+    }
+    .gracias-check path {
+      stroke-dasharray: 36; stroke-dashoffset: 36;
+      animation: gracias-trazo .6s ease-out .3s forwards;
+    }
+    @keyframes gracias-trazo { to { stroke-dashoffset: 0; } }
+    .confeti {
+      position: absolute; top: -14px; width: 8px; height: 13px; border-radius: 2px;
+      animation: gracias-caer 1.8s linear forwards; pointer-events: none;
+    }
+    @keyframes gracias-caer { to { transform: translateY(100vh) rotate(560deg); opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .gracias-check path { animation: none; stroke-dashoffset: 0; }
+      .confeti { display: none; }
+    }
+  </style>
 </head>
 <body>
-  <section class="section section--accent" style="min-height:100vh;display:flex;align-items:center;">
+  <section class="section section--accent gracias-wrap" id="gracias-stage">
     <div class="container container--narrow cta-final">
-      <p style="font-size:3rem;margin-bottom:8px;">🎉</p>
+      <div class="gracias-check">
+        <svg class="gracias-check" width="34" height="34" viewBox="0 0 24 24" fill="none"
+             stroke="#22A6E8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 6L9 17l-5-5" />
+        </svg>
+      </div>
       <h2>¡Ya estás registrado!</h2>
       <p style="color:rgba(255,255,255,.9);font-size:1.05rem;margin-bottom:8px;">
         Entra ahora al grupo privado de WhatsApp donde daremos toda la información del lanzamiento en vivo.
       </p>
-      <a href="https://chat.whatsapp.com/ITDVWsMDcHaIc5t96VjvVS" class="btn btn--lg" style="margin:20px 0;">
+      <a href="https://chat.whatsapp.com/ITDVWsMDcHaIc5t96VjvVS" class="btn btn--lg btn--shine" style="margin:20px 0;">
         Entrar al grupo de WhatsApp →
       </a>
       <p style="color:rgba(255,255,255,.82);font-size:.92rem;">
@@ -34,5 +63,26 @@
       </p>
     </div>
   </section>
+
+  <script>
+    (function celebrar() {
+      var prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (prefersReduced) return;
+      var cont = document.getElementById("gracias-stage");
+      if (!cont) return;
+      var colores = ["#FF6A1F", "#FFAB3C", "#22A6E8", "#FFFFFF"];
+      for (var i = 0; i < 46; i++) {
+        (function (i) {
+          var p = document.createElement("i");
+          p.className = "confeti";
+          p.style.left = (Math.random() * 100) + "%";
+          p.style.background = colores[i % colores.length];
+          p.style.animationDelay = (Math.random() * 0.3) + "s";
+          cont.appendChild(p);
+          setTimeout(function () { p.remove(); }, 2200);
+        })(i);
+      }
+    })();
+  </script>
 </body>
 </html>
