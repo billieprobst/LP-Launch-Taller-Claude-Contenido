@@ -15,9 +15,6 @@ const CONFIG = {
   // Fecha/hora del lanzamiento — 8 oct 2026, 18:00 GMT-5 (Ecuador/Colombia/Perú)
   LAUNCH_DATE: "2026-10-08T18:00:00-05:00",
 
-  // Espera antes de redirigir (ms) para que se vea el mensaje de éxito
-  REDIRECT_DELAY_MS: 1200,
-
   // Pop-up de conversión: aparece a los X segundos si no se ha registrado ni cerrado antes
   POPUP_DELAY_MS: 60000,
 };
@@ -26,6 +23,26 @@ const CONFIG = {
    1. AÑO EN FOOTER
    ================================================================ */
 document.getElementById("year").textContent = new Date().getFullYear();
+
+/* ================================================================
+   1a. STICKY CTA (móvil) — se oculta mientras el formulario está a la vista
+   para no tapar sus botones (Atrás / Continuar / Enviar).
+   ================================================================ */
+(function stickyCtaVisibility() {
+  const sticky = document.querySelector(".sticky-cta");
+  const form = document.getElementById("registro");
+  if (!sticky || !form || !("IntersectionObserver" in window)) return;
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        sticky.classList.toggle("sticky-cta--hidden", e.isIntersecting);
+      });
+    },
+    { threshold: 0.1 }
+  );
+  io.observe(form);
+})();
 
 /* ================================================================
    1b. APARICIÓN AL HACER SCROLL (.reveal → .is-in)
@@ -298,45 +315,40 @@ function normalizeInstagram(value) {
     };
 
     submitBtn.disabled = true;
-    status.textContent = "Guardando tu registro…";
-    status.className = "form__status";
+    status.textContent = "¡Listo! Te llevamos al grupo…";
+    status.className = "form__status ok";
 
     // Evento para GTM / Pixel si se añade después
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ event: "lead_submit", lead: { instagram: payload.instagram } });
-
-    let saved = false;
-    try {
-      const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
-        method: "POST",
-        // text/plain evita el preflight CORS con Apps Script
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json().catch(() => ({}));
-      saved = data && data.ok === true;
-    } catch (err) {
-      console.error("Error al guardar el lead:", err);
-      // fallback: no perder el registro
-      try {
-        navigator.sendBeacon(
-          CONFIG.APPS_SCRIPT_URL,
-          new Blob([JSON.stringify(payload)], { type: "text/plain" })
-        );
-      } catch (_) {}
-    }
-
-    status.textContent = "¡Listo! Te llevamos al grupo…";
-    status.className = "form__status ok";
 
     // Guardar en sessionStorage para gracias.html (fallback)
     try {
       sessionStorage.setItem("inmoescala_registrado", "1");
     } catch (_) {}
 
-    setTimeout(() => {
-      window.location.href = CONFIG.WHATSAPP_GROUP;
-    }, CONFIG.REDIRECT_DELAY_MS);
+    // Envío en segundo plano: sendBeacon no bloquea la navegación y funciona
+    // incluso si la página se abandona de inmediato (redirect a WhatsApp).
+    // No esperamos su respuesta — el usuario no debe notar el guardado.
+    try {
+      const sent = navigator.sendBeacon(
+        CONFIG.APPS_SCRIPT_URL,
+        new Blob([JSON.stringify(payload)], { type: "text/plain" })
+      );
+      if (!sent) throw new Error("sendBeacon no disponible");
+    } catch (err) {
+      // Fallback para navegadores sin sendBeacon: fetch con keepalive,
+      // sin bloquear el redirect (no se usa await).
+      fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      }).catch((e) => console.error("Error al guardar el lead:", e));
+    }
+
+    // Redirección inmediata — sin esperar al servidor.
+    window.location.href = CONFIG.WHATSAPP_GROUP;
   });
 })();
 
