@@ -57,7 +57,7 @@ a { color: var(--navy); text-decoration: none; }
 strong { font-weight: 700; color: var(--ink); }
 
 h1, h2, h3 { line-height: 1.16; color: var(--ink); font-weight: 700; letter-spacing: -.015em; text-wrap: balance; }
-h1 { font-size: clamp(1.9rem, 7vw, 3.15rem); font-weight: 800; }
+h1 { font-size: clamp(1.7rem, 4.6vw, 2.55rem); font-weight: 800; }
 h2 { font-size: clamp(1.5rem, 5.2vw, 2.35rem); font-weight: 800; }
 h3 { font-size: 1.1rem; font-weight: 600; letter-spacing: 0; }
 p { text-wrap: pretty; }
@@ -166,16 +166,16 @@ p { text-wrap: pretty; }
 }
 .hero__grid {
   position: relative;
-  display: grid; grid-template-columns: 1.1fr .9fr;
-  gap: clamp(28px, 5vw, 56px); align-items: center;
+  display: grid; grid-template-columns: 1.25fr .75fr;
+  gap: clamp(32px, 5vw, 64px); align-items: center;
 }
 
 .badge {
-  display: inline-flex; align-items: center; gap: 9px;
+  display: inline-flex; align-items: center; gap: 8px;
   background: #fff; color: var(--accent-dark);
-  font-weight: 700; font-size: clamp(.66rem, 2vw, .78rem);
-  letter-spacing: .02em; line-height: 1.3;
-  padding: 8px 15px; border-radius: 999px; margin-bottom: 18px;
+  font-weight: 700; font-size: clamp(.68rem, 1.7vw, .78rem);
+  letter-spacing: .01em; line-height: 1.3; white-space: nowrap;
+  padding: 9px 16px; border-radius: 999px; margin-bottom: 22px;
   box-shadow: var(--shadow-s); border: 1px solid var(--line);
 }
 .badge__dot {
@@ -189,13 +189,13 @@ p { text-wrap: pretty; }
   100% { box-shadow: 0 0 0 0 rgba(242, 101, 34, 0); }
 }
 
-.hero h1 { margin-bottom: 16px; }
+.hero h1 { margin-bottom: 20px; }
 .hero__sub {
-  font-size: clamp(1rem, 2.8vw, 1.14rem); color: var(--body);
-  max-width: 44ch; margin-bottom: 26px;
+  font-size: clamp(1rem, 2.4vw, 1.12rem); color: var(--body);
+  max-width: 42ch; margin-bottom: 32px;
 }
 .hero__actions-note, .hero__note {
-  margin-top: 14px; font-size: clamp(.82rem, 2.3vw, .9rem); color: var(--muted);
+  margin-top: 16px; font-size: clamp(.82rem, 2.3vw, .9rem); color: var(--muted);
 }
 
 /* ---- Prueba social bajo el CTA del hero ---- */
@@ -214,11 +214,12 @@ p { text-wrap: pretty; }
 
 .hero__media { position: relative; }
 .hero__img {
-  width: 100%; max-width: 440px; margin-inline: auto;
+  width: 100%; max-width: 400px; margin-inline: auto;
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-l);
   aspect-ratio: 4 / 5; object-fit: cover;
-  background: var(--paper-2);
+  /* mientras no haya foto real, degradado suave en vez de gris plano */
+  background: linear-gradient(150deg, var(--paper-2), #e9eff8);
 }
 /* tarjetita decorativa "en vivo" sobre la foto */
 .hero__media::after {
@@ -231,11 +232,11 @@ p { text-wrap: pretty; }
 }
 
 /* ---------- Countdown ---------- */
-.countdown { margin-bottom: 24px; }
+.countdown { margin-bottom: 32px; }
 .countdown__label {
   display: block; font-size: .72rem; color: var(--muted);
   font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .countdown__timer { display: flex; align-items: stretch; gap: 8px; }
 .countdown__unit {
