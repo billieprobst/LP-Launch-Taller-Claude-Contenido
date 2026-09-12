@@ -34,8 +34,8 @@ const CONFIG = {
   WHATSAPP_GROUP: "https://chat.whatsapp.com/ITDVWsMDcHaIc5t96VjvVS",
   LAUNCH_TEXT: "8 de octubre, 6:00 pm (Ecuador · Colombia · Perú)",
 
-  // Logo hosteado en la landing publicada (los emails no pueden usar archivos locales)
-  LOGO_URL: "https://lp-launch-taller-claude-contenido.vercel.app/assets/img/logo-club-banner.png",
+  // Banner de encabezado del email (hosteado en postimg.cc — no depende del deploy de Vercel)
+  HEADER_BANNER_URL: "https://i.postimg.cc/jdMddjDx/Chat-GPT-Image-Sep-11-2026-07-13-03-PM.png",
 };
 
 const HEADERS = [
@@ -155,24 +155,23 @@ function welcomeHtml_(nombre) {
                  style="max-width:520px;background:#ffffff;border-radius:20px;overflow:hidden;
                         box-shadow:0 10px 30px rgba(19,34,86,.12);">
 
-            <!-- Header con logo -->
+            <!-- Banner de encabezado (logo + mensaje de registro exitoso) -->
             <tr>
-              <td align="center" style="background:#ffffff;padding:28px 24px;border-bottom:1px solid #e6ebf4;">
-                <img src="${CONFIG.LOGO_URL}" alt="Inmoescala Club" width="220" style="display:block;">
+              <td style="line-height:0;">
+                <img src="${CONFIG.HEADER_BANNER_URL}" alt="Registro exitoso al Taller de Claude para Inmobiliarios"
+                     width="520" style="display:block;width:100%;height:auto;">
               </td>
             </tr>
 
             <!-- Cuerpo -->
             <tr>
-              <td style="padding:32px 28px 8px;">
+              <td style="padding:28px 28px 8px;">
                 <p style="margin:0 0 18px;font-size:20px;font-weight:700;color:#132256;">
                   ${saludo}
                 </p>
                 <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#1f2430;">
-                  ¡Felicidades! Tu registro al <strong>Taller de Vende Propiedades en Redes
-                  Sociales con Claude</strong> está confirmado. Este es tu acceso directo al
-                  grupo privado de WhatsApp donde compartiremos toda la información del
-                  Taller Gratuito.
+                  Tu registro está confirmado. Este es tu acceso directo al grupo privado de
+                  WhatsApp donde compartiremos toda la información del Taller Gratuito.
                 </p>
               </td>
             </tr>
