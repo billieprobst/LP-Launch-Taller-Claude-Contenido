@@ -232,6 +232,14 @@ p { text-wrap: pretty; }
   backdrop-filter: blur(4px);
 }
 
+/* Badge flotante del logo de Claude, sobre la esquina inferior de la foto */
+.hero__claude-badge {
+  position: absolute; bottom: -14px; right: -14px;
+  width: 64px; height: 64px; border-radius: 18px;
+  border: 3px solid #fff; box-shadow: var(--shadow-l);
+  background: #fff;
+}
+
 /* ---------- Countdown ---------- */
 .countdown { margin-bottom: 32px; }
 .countdown__label {
