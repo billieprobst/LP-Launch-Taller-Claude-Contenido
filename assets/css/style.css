@@ -142,7 +142,8 @@ p { text-wrap: pretty; }
   display: flex; align-items: center; justify-content: space-between;
   padding-block: 11px;
 }
-.logo img { display: block; height: 34px; width: auto; }
+.logo { display: flex; align-items: center; }
+.logo img { display: block; height: 38px; width: auto; }
 
 /* ================================================================
    HERO — fondo con malla de luz + tarjeta flotante
@@ -701,7 +702,7 @@ p { text-wrap: pretty; }
 
   /* ---- Header ---- */
   .site-header .btn--sm { display: none; }
-  .site-header .logo img { height: 28px; }
+  .site-header .logo img { height: 30px; }
 
   /* ---- Hero ---- */
   .hero { padding-block: 32px 40px; }
