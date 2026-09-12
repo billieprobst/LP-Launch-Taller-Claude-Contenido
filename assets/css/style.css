@@ -205,7 +205,8 @@ p { text-wrap: pretty; }
 }
 .social-proof__avatars { display: flex; flex-shrink: 0; }
 .social-proof__avatars img {
-  width: 30px; height: 30px; border-radius: 50%; object-fit: cover;
+  width: 34px; height: 34px; border-radius: 50%; object-fit: cover;
+  object-position: center 18%; /* prioriza la cara en fotos de cuerpo/retrato */
   border: 2px solid var(--paper); background: var(--paper-2);
   margin-left: -10px;
 }
@@ -301,6 +302,7 @@ p { text-wrap: pretty; }
 .testi__top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .testi__avatar {
   width: 52px; height: 52px; border-radius: 50%; object-fit: cover;
+  object-position: center 18%; /* prioriza la cara en fotos de cuerpo/retrato */
   background: var(--paper-2); flex-shrink: 0;
   border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line);
 }
@@ -448,11 +450,15 @@ p { text-wrap: pretty; }
   box-shadow: var(--shadow-s);
   display: grid; gap: 12px;
 }
-.about__card p { display: flex; gap: 10px; align-items: flex-start; font-size: .95rem; color: var(--body); }
+.about__card p {
+  overflow: hidden; /* contiene el check flotante para que el texto fluya normal */
+  font-size: .95rem; line-height: 1.55; color: var(--body);
+}
 .check {
+  float: left; margin: 2px 10px 2px 0;
   color: #fff; background: var(--cyan);
-  width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0;
-  display: grid; place-items: center; font-size: .7rem; font-weight: 700; margin-top: 2px;
+  width: 20px; height: 20px; border-radius: 6px;
+  display: grid; place-items: center; font-size: .7rem; font-weight: 700;
 }
 
 /* ================================================================
@@ -661,6 +667,9 @@ p { text-wrap: pretty; }
   .hero__img { max-width: 340px; }
   .about { grid-template-columns: 1fr; }
   .about__photos { max-width: 400px; margin-inline: auto; }
+  /* El bloque decorativo detrás de la foto se ve desproporcionado en pantallas chicas */
+  .about__photos::before { display: none; }
+  .about__photos img { box-shadow: var(--shadow-l); }
   .about h2, .about__eyebrow { text-align: center; }
   .about__lead { text-align: center; }
   .grid--3 { grid-template-columns: 1fr 1fr; }
