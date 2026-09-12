@@ -670,18 +670,69 @@ p { text-wrap: pretty; }
 }
 
 @media (max-width: 640px) {
-  .grid--3, .grid--2 { grid-template-columns: 1fr; }
-  .pains-grid { grid-template-columns: 1fr; gap: 12px; }
-  .gifts-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .gift__media { height: 100px; }
-  .gift__media img { max-width: 100px; max-height: 100px; }
-  .sticky-cta { display: block; }
+  /* ---- Base: aire y tipografía ---- */
+  body { font-size: 15.5px; padding-bottom: 78px; }
+  .section { padding-block: 44px; }
+  .section__intro { margin-top: 10px; }
+  h1 { font-size: clamp(1.55rem, 7.5vw, 1.9rem); line-height: 1.2; }
+  h2 { font-size: clamp(1.35rem, 6.5vw, 1.65rem); line-height: 1.24; }
+  .section > .container > h2 { max-width: 100%; }
+  .section__eyebrow { margin-bottom: 10px; }
+
+  /* Gutter garantizado en toda la página */
+  .container { padding-inline: 18px; }
+
+  /* ---- Header ---- */
   .site-header .btn--sm { display: none; }
-  body { padding-bottom: 76px; }
-  .form__nav { flex-wrap: wrap; }
+  .site-header .logo img { height: 28px; }
+
+  /* ---- Hero ---- */
+  .hero { padding-block: 32px 40px; }
+  .badge { white-space: normal; text-align: center; line-height: 1.4; margin-bottom: 18px; }
+  .hero h1 { margin-bottom: 14px; }
+  .hero__sub { font-size: .96rem; margin-bottom: 24px; }
+  .countdown { margin-bottom: 24px; }
+  .countdown__timer { gap: 6px; }
+  .countdown__unit { padding: 10px 4px; }
+  .countdown__unit span { font-size: 1.3rem; }
+  .social-proof { margin-top: 16px; font-size: .84rem; }
+  .hero__note { font-size: .8rem; line-height: 1.5; }
+  .hero__media { margin-bottom: 4px; }
+  .hero__img { max-width: 280px; }
+
+  /* ---- Marquee ---- */
+  .marquee { padding-block: 9px; }
+
+  /* ---- Grids a 1 columna con aire consistente ---- */
+  .grid--3, .grid--2 { grid-template-columns: 1fr; gap: 14px; }
+  .testi-wrap { margin-top: 30px; }
+  .testi { padding: 22px 20px; }
+
+  .pains-grid { grid-template-columns: 1fr; gap: 12px; margin-top: 28px; }
+  .pain { padding: 20px 18px; }
+
+  /* ---- Regalos ---- */
+  .gifts-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 28px; }
+  .gift { padding: 16px 10px 14px; }
+  .gift__media { height: 92px; margin-bottom: 8px; }
+  .gift__media img { max-width: 92px; max-height: 92px; }
+  .gift__title { font-size: .78rem; }
+  .gift__surprise-mark { font-size: 2.4rem; }
+  .gifts__note { font-size: .82rem; margin-top: 20px; }
+
+  /* ---- Quién soy ---- */
+  .about__photos { max-width: 280px; }
+  .about__card { padding: 18px 20px; }
+  .about__lead { font-size: .95rem; }
+
+  /* ---- Formulario ---- */
+  .form { padding: 24px 18px; margin-top: 26px; }
+  .form__step legend { font-size: 1.05rem; }
+  .form--wizard .form__step legend { font-size: 1.15rem; }
+  .opt { font-size: .9rem; }
+  .form__nav { flex-wrap: wrap; gap: 10px; }
   .form__nav .btn--ghost { width: 100%; order: 2; }
   .btn { width: 100%; }        /* CTAs full-width en móvil */
-  .site-header .logo img { height: 30px; }
 
   /* Área de toque cómoda (mín. 44px) en opciones y campos */
   .opt { min-height: 48px; padding-block: 13px; }
@@ -690,17 +741,22 @@ p { text-wrap: pretty; }
   .form input[type="email"],
   .form input[type="tel"] { min-height: 50px; font-size: 16px; } /* 16px evita zoom-in de iOS al enfocar */
   .form__check input { width: 19px; height: 19px; }
-  .popup__close { width: 38px; height: 38px; }
 
-  /* Gutter garantizado en toda la página */
-  .container { padding-inline: 18px; }
+  /* ---- Footer y sticky ---- */
+  .site-footer { padding-block: 32px; }
+  .sticky-cta { display: block; padding: 14px; font-size: .94rem; }
+  .popup__close { width: 38px; height: 38px; }
+  .popup { padding: 26px 22px; }
 }
 
 @media (max-width: 380px) {
-  .countdown__unit small { font-size: .52rem; }
-  .countdown__timer { gap: 6px; }
+  .countdown__unit small { font-size: .5rem; }
+  .countdown__timer { gap: 5px; }
   .container { padding-inline: 16px; }
-  .btn--lg { padding: 16px 24px; font-size: 1rem; }
+  .btn--lg { padding: 15px 20px; font-size: .96rem; }
+  .gifts-grid { gap: 10px; }
+  .gift__media { height: 80px; }
+  .gift__media img { max-width: 80px; max-height: 80px; }
 }
 
 /* ================================================================
