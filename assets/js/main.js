@@ -17,6 +17,11 @@ const CONFIG = {
 
   // Pop-up de conversión: aparece a los X segundos si no se ha registrado ni cerrado antes
   POPUP_DELAY_MS: 60000,
+
+  // Tiempo máximo de espera por la confirmación del guardado (una sola solicitud,
+  // sin reintento automático). Google Apps Script puede tardar varios segundos,
+  // sobre todo en redes móviles, así que el plazo es generoso.
+  SAVE_CONFIRM_TIMEOUT_MS: 15000,
 };
 
 /* ================================================================
@@ -176,6 +181,39 @@ function normalizeInstagram(value) {
 }
 
 /* ================================================================
+   4b. SUBMISSION ID + DEDUP DEL EVENTO "Lead"
+   El backend (Apps Script) no devuelve un ID único de fila, así que
+   generamos uno estable por sesión de formulario (persiste en
+   sessionStorage, se re-crea en una pestaña/sesión nueva). Sirve como
+   eventID de deduplicación en Meta y para evitar reenvíos por doble
+   clic o remontajes del formulario.
+   ================================================================ */
+function getSubmissionId_() {
+  try {
+    let id = sessionStorage.getItem("inmoescala_submission_id");
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+      sessionStorage.setItem("inmoescala_submission_id", id);
+    }
+    return id;
+  } catch (_) {
+    return String(Date.now()) + Math.random().toString(16).slice(2);
+  }
+}
+
+function leadAlreadySent_(submissionId) {
+  try {
+    return sessionStorage.getItem("inmoescala_lead_sent_" + submissionId) === "1";
+  } catch (_) {
+    return false;
+  }
+}
+
+function markLeadSent_(submissionId) {
+  try { sessionStorage.setItem("inmoescala_lead_sent_" + submissionId, "1"); } catch (_) {}
+}
+
+/* ================================================================
    5. "OTRO" EN ROL → muestra input de texto
    ================================================================ */
 (function rolOtro() {
@@ -291,13 +329,27 @@ function normalizeInstagram(value) {
   });
 
   /* ---------- ENVÍO ---------- */
+  // isSubmitting bloquea envíos concurrentes (doble clic, Enter + clic, etc.)
+  // durante TODO el intento: desde que se pulsa "Enviar" hasta que llega la
+  // respuesta (éxito, error o timeout). Solo hay UNA solicitud de red por
+  // intento — no hay reintento automático en paralelo ni por sendBeacon.
+  let isSubmitting = false;
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!validateStep(current)) return;
+    if (isSubmitting) return;
+    isSubmitting = true;
+
+    // Mismo submissionId durante todo el intento (y en un reintento posterior,
+    // porque vive en sessionStorage — no se regenera hasta que haya éxito o
+    // se recargue/cierre la sesión del navegador).
+    const submissionId = getSubmissionId_();
 
     const fd = new FormData(form);
     const utms = getUTMs();
     const payload = {
+      submissionId: submissionId,
       fecha: new Date().toISOString(),
       nombre: (fd.get("nombre") || "").trim(),
       whatsapp: (fd.get("whatsapp") || "").trim(),
@@ -315,40 +367,68 @@ function normalizeInstagram(value) {
     };
 
     submitBtn.disabled = true;
-    status.textContent = "¡Listo! Te llevamos al grupo…";
-    status.className = "form__status ok";
+    status.textContent = "Enviando tu registro…";
+    status.className = "form__status";
 
     // Evento para GTM / Pixel si se añade después
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ event: "lead_submit", lead: { instagram: payload.instagram } });
 
-    // Guardar en sessionStorage para gracias.html (fallback)
-    try {
-      sessionStorage.setItem("inmoescala_registrado", "1");
-    } catch (_) {}
+    // Una sola solicitud, con un tiempo máximo generoso (Apps Script puede
+    // tardar varios segundos, más en redes móviles). AbortController cancela
+    // el fetch si se cumple el plazo, en vez de dejarlo "colgado" en segundo
+    // plano — así nunca hay dos solicitudes en vuelo para el mismo intento.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), CONFIG.SAVE_CONFIRM_TIMEOUT_MS);
 
-    // Envío en segundo plano: sendBeacon no bloquea la navegación y funciona
-    // incluso si la página se abandona de inmediato (redirect a WhatsApp).
-    // No esperamos su respuesta — el usuario no debe notar el guardado.
+    let result = null;
     try {
-      const sent = navigator.sendBeacon(
-        CONFIG.APPS_SCRIPT_URL,
-        new Blob([JSON.stringify(payload)], { type: "text/plain" })
-      );
-      if (!sent) throw new Error("sendBeacon no disponible");
-    } catch (err) {
-      // Fallback para navegadores sin sendBeacon: fetch con keepalive,
-      // sin bloquear el redirect (no se usa await).
-      fetch(CONFIG.APPS_SCRIPT_URL, {
+      const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload),
-        keepalive: true,
-      }).catch((e) => console.error("Error al guardar el lead:", e));
+        signal: controller.signal,
+      });
+      result = await res.json();
+    } catch (_) {
+      result = null; // timeout (abort) o error de red
+    } finally {
+      clearTimeout(timeoutId);
     }
 
-    // Redirección inmediata — sin esperar al servidor.
-    window.location.href = CONFIG.WHATSAPP_GROUP;
+    const confirmed = !!(result && result.ok === true && result.submissionId === submissionId);
+
+    if (confirmed) {
+      try { sessionStorage.setItem("inmoescala_registrado", "1"); } catch (_) {}
+
+      if (!leadAlreadySent_(submissionId)) {
+        markLeadSent_(submissionId);
+        if (typeof fbq === "function") {
+          fbq("track", "Lead", {}, { eventID: `lead_${submissionId}` });
+        }
+      }
+
+      status.textContent = "¡Listo! Te llevamos al grupo…";
+      status.className = "form__status ok";
+
+      // Redirección al grupo de WhatsApp — se trata como el "clic" a WhatsApp
+      // porque no hay un botón intermedio en este flujo (ver gracias.html
+      // para el caso en que el usuario llegue ahí manualmente).
+      if (typeof fbq === "function") {
+        fbq("trackCustom", "WhatsAppGroupClick", { source: "post_registration" });
+      }
+      window.location.href = CONFIG.WHATSAPP_GROUP;
+      return;
+    }
+
+    // No confirmado (falla, timeout, o respuesta inesperada): no se dispara
+    // Lead, no se reintenta automáticamente ni por sendBeacon. Se informa al
+    // usuario y se reactiva el botón SOLO aquí, para permitir un reintento
+    // manual explícito con el mismo submissionId.
+    isSubmitting = false;
+    submitBtn.disabled = false;
+    status.textContent = "No pudimos confirmar tu registro. Revisa tu conexión e inténtalo de nuevo.";
+    status.className = "form__status error";
   });
 })();
 

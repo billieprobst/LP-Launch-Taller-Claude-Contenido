@@ -10,6 +10,23 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
+
+  <!-- Meta Pixel Code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window,document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+
+  fbq('init', '1137218735304361');
+  fbq('track', 'PageView');
+  </script>
+  <!-- End Meta Pixel Code -->
+
   <style>
     .gracias-wrap {
       min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden;
@@ -36,6 +53,10 @@
   </style>
 </head>
 <body>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1137218735304361&ev=PageView&noscript=1"
+  /></noscript>
+
   <section class="section section--accent gracias-wrap" id="gracias-stage">
     <div class="container container--narrow cta-final">
       <div class="gracias-check">
@@ -48,7 +69,7 @@
       <p style="color:rgba(255,255,255,.9);font-size:1.05rem;margin-bottom:8px;">
         Entra ahora al grupo privado de WhatsApp donde daremos toda la información del lanzamiento en vivo.
       </p>
-      <a href="https://chat.whatsapp.com/ITDVWsMDcHaIc5t96VjvVS" class="btn btn--lg btn--shine" style="margin:20px 0;">
+      <a href="https://chat.whatsapp.com/ITDVWsMDcHaIc5t96VjvVS" class="btn btn--lg btn--shine" style="margin:20px 0;" id="whatsapp-group-link">
         Entrar al grupo de WhatsApp →
       </a>
       <p style="color:rgba(255,255,255,.82);font-size:.92rem;">
@@ -65,6 +86,19 @@
   </section>
 
   <script>
+    (function whatsappClickTracking() {
+      var link = document.getElementById("whatsapp-group-link");
+      if (!link) return;
+      var fired = false;
+      link.addEventListener("click", function () {
+        if (fired) return;
+        fired = true;
+        if (typeof fbq === "function") {
+          fbq("trackCustom", "WhatsAppGroupClick", { source: "post_registration" });
+        }
+      });
+    })();
+
     (function celebrar() {
       var prefersReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (prefersReduced) return;
