@@ -417,7 +417,14 @@ function markLeadSent_(submissionId) {
       if (typeof fbq === "function") {
         fbq("trackCustom", "WhatsAppGroupClick", { source: "post_registration" });
       }
-      window.location.href = CONFIG.WHATSAPP_GROUP;
+
+      // fbq envía sus peticiones de forma asíncrona (fetch/beacon internos).
+      // Si navegamos de inmediato, el navegador puede cancelar esas peticiones
+      // antes de que salgan. Un pequeño margen le da tiempo al pixel a
+      // despachar Lead y WhatsAppGroupClick antes de abandonar la página.
+      setTimeout(() => {
+        window.location.href = CONFIG.WHATSAPP_GROUP;
+      }, 250);
       return;
     }
 
