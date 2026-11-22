@@ -1,0 +1,36 @@
+/* ================================================================
+   ENVIAR CADA REGISTRO A WORK (copia automática)
+   ----------------------------------------------------------------
+   Esto NO reemplaza nada: el Sheet y el email siguen igual. Solo agrega una copia del registro a Work,
+   y si Work falla por cualquier motivo, el registro de la persona NO se afecta.
+
+   PASOS (una sola vez):
+   1. En Apps Script: ⚙ Configuración del proyecto → Propiedades del script → Agregar:
+        WORK_URL    = https://work.inmoescala.com/api/lanzamientos/registro
+        WORK_SECRET = (el secreto que pone Billie en Vercel como WORK_INGEST_SECRET_LANDING)
+      El secreto va SOLO ahí, nunca dentro del código ni en el chat.
+   2. Pega la función de abajo al final de tu Código.gs.
+   3. Dentro de doPost, justo después de `const data = JSON.parse(e.postData.contents);`, agrega UNA línea:
+        enviarAWork_(data);
+   4. Implementar → Administrar implementaciones → Editar → Versión nueva → Implementar.
+      (La URL /exec no cambia.)
+   ================================================================ */
+
+function enviarAWork_(data) {
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const url = props.getProperty("WORK_URL");
+    const secret = props.getProperty("WORK_SECRET");
+    if (!url || !secret) return; // sin configurar: no hace nada
+    UrlFetchApp.fetch(url, {
+      method: "post",
+      contentType: "application/json",
+      headers: { "x-work-ingest-secret": secret },
+      muteHttpExceptions: true,
+      payload: JSON.stringify(data),
+    });
+  } catch (err) {
+    // A propósito en silencio: el registro de la persona nunca depende de Work.
+    Logger.log("Work no recibió el registro: " + err);
+  }
+}
