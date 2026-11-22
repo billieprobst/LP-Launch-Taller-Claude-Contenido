@@ -29,7 +29,7 @@ const CONFIG = {
 };
 
 /* ---------- Próxima clase (se calcula sola, cada semana) ----------
-   La clase es en vivo todos los viernes a las 6:00 pm de Colombia, Ecuador y Perú
+   La clase es en vivo un día fijo a las 6:00 pm de Colombia, Ecuador y Perú
    (UTC-5 todo el año, sin horario de verano). El contador cuenta hasta el próximo viernes
    y, cuando la clase empieza, se queda en "en vivo" unos minutos y pasa solo a la semana siguiente. */
 function proximaClase(ahora) {
