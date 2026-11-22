@@ -12,8 +12,12 @@ const CONFIG = {
   // URL de la Web App de Google Apps Script (se obtiene al publicar — ver README)
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzCb2-LP-9A1JyExoPpAFYHLkmyfnVkZ5dCYQ3tMf7jXQUzjz6yXw5ixOKoUe4Ktle1/exec",
 
-  // Fecha/hora del lanzamiento — 8 oct 2026, 18:00 GMT-5 (Ecuador/Colombia/Perú)
-  LAUNCH_DATE: "2026-10-08T18:00:00-05:00",
+  // Clase en vivo semanal: viernes (0 = domingo … 5 = viernes), 18:00 hora de Colombia/Ecuador/Perú (UTC-5).
+  // El contador y las fechas de la página se calculan solos; no hay que tocar nada cada semana.
+  CLASE_DIA_SEMANA: 5,
+  CLASE_HORA: 18,
+  // Minutos que la página muestra "en vivo" después de la hora de inicio, antes de pasar a la semana siguiente.
+  CLASE_EN_VIVO_MIN: 90,
 
   // Pop-up de conversión: aparece a los X segundos si no se ha registrado ni cerrado antes
   POPUP_DELAY_MS: 60000,
@@ -23,6 +27,37 @@ const CONFIG = {
   // sobre todo en redes móviles, así que el plazo es generoso.
   SAVE_CONFIRM_TIMEOUT_MS: 15000,
 };
+
+/* ---------- Próxima clase (se calcula sola, cada semana) ----------
+   La clase es en vivo todos los viernes a las 6:00 pm de Colombia, Ecuador y Perú
+   (UTC-5 todo el año, sin horario de verano). El contador cuenta hasta el próximo viernes
+   y, cuando la clase empieza, se queda en "en vivo" unos minutos y pasa solo a la semana siguiente. */
+function proximaClase(ahora) {
+  const OFFSET_MS = 5 * 3600000;
+  const local = new Date(ahora - OFFSET_MS); // reloj de Colombia leído como UTC
+  const dia = local.getUTCDay();
+  let dif = (CONFIG.CLASE_DIA_SEMANA - dia + 7) % 7;
+  const inicioHoy = Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate(), CONFIG.CLASE_HORA, 0);
+  const finVentana = inicioHoy + CONFIG.CLASE_EN_VIVO_MIN * 60000;
+  if (dif === 0 && local.getTime() >= finVentana) dif = 7;
+  const inicio = new Date(inicioHoy + dif * 86400000 + OFFSET_MS);
+  const nombreDia = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"][CONFIG.CLASE_DIA_SEMANA];
+  const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  const f = new Date(inicio.getTime() - OFFSET_MS);
+  return {
+    inicio: inicio,
+    semana: f.toISOString().slice(0, 10),
+    textoFecha: nombreDia + " " + f.getUTCDate() + " de " + meses[f.getUTCMonth()],
+    enVivo: dif === 0 && local.getTime() >= inicioHoy,
+  };
+}
+
+function rellenarFechaDeClase_() {
+  const c = proximaClase(Date.now());
+  document.querySelectorAll("[data-clase=fecha]").forEach((el) => { el.textContent = c.textoFecha; });
+  document.querySelectorAll("[data-clase=fecha-mayus]").forEach((el) => { el.textContent = c.textoFecha.toUpperCase(); });
+}
+rellenarFechaDeClase_();
 
 /* ================================================================
    1. AÑO EN FOOTER
@@ -117,7 +152,8 @@ const runCounter = (function counterSetup() {
    2. CONTADOR REGRESIVO
    ================================================================ */
 (function countdown() {
-  const target = new Date(CONFIG.LAUNCH_DATE).getTime();
+  const clase = proximaClase(Date.now());
+  const target = clase.inicio.getTime();
   const el = {
     days: document.querySelector('[data-cd="days"]'),
     hours: document.querySelector('[data-cd="hours"]'),
@@ -134,7 +170,7 @@ const runCounter = (function counterSetup() {
       el.days.textContent = el.hours.textContent =
         el.minutes.textContent = el.seconds.textContent = "00";
       const label = document.querySelector(".countdown__label");
-      if (label) label.textContent = "¡El lanzamiento en vivo está por comenzar!";
+      if (label) label.textContent = "¡La clase está en vivo ahora!";
       clearInterval(timer);
       return;
     }
@@ -351,6 +387,7 @@ function markLeadSent_(submissionId) {
     const payload = {
       submissionId: submissionId,
       fecha: new Date().toISOString(),
+      semana: proximaClase(Date.now()).semana, // día de la clase a la que se registra (AAAA-MM-DD)
       nombre: (fd.get("nombre") || "").trim(),
       whatsapp: (fd.get("whatsapp") || "").trim(),
       email: (fd.get("email") || "").trim(),

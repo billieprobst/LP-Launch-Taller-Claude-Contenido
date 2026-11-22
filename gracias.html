@@ -13,6 +13,20 @@
 
   <!-- Meta Pixel Code -->
   <script>
+    // Misma regla que la página principal: próximo viernes 6:00 pm (UTC-5), sin tocar nada cada semana.
+    (function () {
+      var OFF = 5 * 3600000, ahora = Date.now(), l = new Date(ahora - OFF), d = l.getUTCDay();
+      var ini = Date.UTC(l.getUTCFullYear(), l.getUTCMonth(), l.getUTCDate(), 18, 0);
+      var dif = (5 - d + 7) % 7;
+      if (dif === 0 && l.getTime() >= ini + 90 * 60000) dif = 7;
+      var f = new Date(ini + dif * 86400000);
+      var meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll("[data-clase=fecha]").forEach(function (el) { el.textContent = "viernes " + f.getUTCDate() + " de " + meses[f.getUTCMonth()]; });
+      });
+    })();
+  </script>
+  <script>
   !function(f,b,e,v,n,t,s)
   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
   n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -76,7 +90,7 @@
         También te enviamos el enlace a tu correo.
       </p>
       <p style="color:rgba(255,255,255,.82);font-size:.92rem;margin-top:16px;">
-        📅 <strong>Lanzamiento en vivo:</strong> 8 de octubre, 6:00 pm (Ecuador · Colombia · Perú)<br />
+        📅 <strong>Lanzamiento en vivo:</strong> <span data-clase="fecha">cada viernes</span>, 6:00 pm (Ecuador · Colombia · Perú)<br />
         🎁 Estás participando en el sorteo de una auditoría de tu perfil y contenido. El ganador se anuncia en vivo.
       </p>
       <p style="margin-top:24px;">
